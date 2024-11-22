@@ -33,24 +33,24 @@ using ProgressusWebApi.Services.InventarioServices;
 using ProgressusWebApi.Services.InventarioServices.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
-// Configuraci贸n de CORS para aceptar peticiones de cualquier origen
+// Configuraci髇 de CORS para aceptar peticiones de cualquier origen
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins", policy =>
     {
         policy.AllowAnyOrigin() // Permite cualquier origen
               .AllowAnyHeader() // Permite cualquier encabezado
-              .AllowAnyMethod(); // Permite cualquier m茅todo (GET, POST, etc.)
+              .AllowAnyMethod(); // Permite cualquier m閠odo (GET, POST, etc.)
     });
 });
 // Agregar los servicios al contenedor
-// Configuraci贸n para ignorar referencias c铆clicas en la serializaci贸n JSON
+// Configuraci髇 para ignorar referencias c韈licas en la serializaci髇 JSON
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 });
 
-// Inyecci贸n de repositorios y servicios
+// Inyecci髇 de repositorios y servicios
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEjercicioRepository, EjercicioRepository>();
 builder.Services.AddScoped<IEjercicioService, EjercicioService>();
@@ -76,8 +76,8 @@ builder.Services.AddScoped<ISolicitudDePagoRepository, SolicitudDePagoRepository
 builder.Services.AddScoped<ISolicitudDePagoService, SolicitudDePagoService>();
 builder.Services.AddMemoryCache();
 
-// Permitir documentaci贸n y acceso de los endpoints con swagger
-// Configuraci贸n con oauth2 para requerir autorizaci贸n en la ejecuci贸n de los endpoints 
+// Permitir documentaci髇 y acceso de los endpoints con swagger
+// Configuraci髇 con oauth2 para requerir autorizaci髇 en la ejecuci髇 de los endpoints 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -90,11 +90,11 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
-// Conexi贸n a la base de datos
+// Conexi髇 a la base de datos
 builder.Services.AddDbContext<ProgressusDataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Autenticaci贸n y autorizaci贸n con Identity (endpoints)
+// Autenticaci髇 y autorizaci髇 con Identity (endpoints)
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<IdentityUser>(options =>
 {
@@ -103,30 +103,25 @@ builder.Services.AddIdentityApiEndpoints<IdentityUser>(options =>
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ProgressusDataContext>();
 
-// Configuraci贸n para envio de emails con servidor SMTP de Gmail
+// Configuraci髇 para envio de emails con servidor SMTP de Gmail
 builder.Services.AddTransient<IEmailSenderService, EmailSenderService>();
 builder.Services.Configure<GmailSetter>(builder.Configuration.GetSection("GmailSettings"));
 
-// Configuraci贸n para sistema de cobros con MercadoPago
+// Configuraci髇 para sistema de cobros con MercadoPago
 
 builder.Services.AddScoped<IMercadoPagoRepository, MercadoPagoRepository>();
 builder.Services.AddScoped<IMercadoPagoService, MercadoPagoService>(); MercadoPagoConfig.AccessToken = "APP_USR-2278733141716614-062815-583c9779901a7bbf32c8e8a73971e44c-1878150528";
 builder.Services.AddScoped<IReservaService, ReservaService>();
 builder.Services.AddScoped<IInventarioService, InventarioService>();
-// Construir la aplicaci贸n con todas las configuraciones y servicios definidos en el objeto builder
+// Construir la aplicaci髇 con todas las configuraciones y servicios definidos en el objeto builder
 var app = builder.Build();
 
-// Configuraci锟絥 de la pipeline del HTTP request
-// Comentamos este if para que se pueda deployar en desarrollo
-//if (app.Environment.IsDevelopment())
-//{
-    //app.UseSwagger();
-    //app.UseSwaggerUI();
-//}
-
-app.UseSwagger();
-app.UseSwaggerUI();
-
+// Configuraci髇 de la pipeline del HTTP request
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 // Aplicar CORS para permitir cualquier origen
 app.UseCors("AllowAllOrigins");
 // Mapear endpoints de authorization y authentication
