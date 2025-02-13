@@ -3,11 +3,14 @@ using ProgressusWebApi.Dtos.EjercicioDtos.EjercicioDto;
 using ProgressusWebApi.Dtos.PlanDeEntrenamientoDtos.PlanDeEntrenamiento;
 using ProgressusWebApi.Dtos.PlanDeEntrenamientoDtos.PlanDeEntrenamientoDto;
 using ProgressusWebApi.Model;
+using ProgressusWebApi.Models.PlanEntrenamientoModels;
 
 namespace ProgressusWebApi.Services.PlanEntrenamientoServices.Interfaces
 {
     public interface IPlanDeEntrenamientoService
     {
+        Task CrearRegistrosDeDesempeño(DesempeñoDto desempeñoDto);
+        Task<List<RegistroDesempeñoSerie>> ObtenerRegistrosEntreFechas(DateTime fechaInicio, DateTime fechaFin);
         Task<PlanDeEntrenamiento> Crear(CrearPlanDeEntrenamientoDto planCreadoDto);
         Task<PlanDeEntrenamiento> Actualizar(int id, ActualizarPlanDeEntrenamientoDto planActualizadoDto);
         Task<bool> Eliminar(int id);

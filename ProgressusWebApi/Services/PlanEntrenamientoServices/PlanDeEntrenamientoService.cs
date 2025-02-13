@@ -26,6 +26,28 @@ namespace ProgressusWebApi.Services.PlanEntrenamientoServices
             _ejercicioDePlanRepository = ejercicioDePlanRepository;
             _ejercicioRepository = ejercicioRepository;
         }
+
+        // 1️⃣ Crear registros de desempeño
+        public async Task CrearRegistrosDeDesempeño(DesempeñoDto desempeñoDto)
+        {
+            var registros = desempeñoDto.desempeños.Select(d => new RegistroDesempeñoSerie
+            {
+                EjercicioEnDiaDelPlanId = d.EjercicioEnDiaDelPlanId,
+                RegistroDesempeñoDiaId = d.RegistroDesempeñoDiaId,
+                RepeticionesConcretadas = d.RepeticionesConcretadas,
+                PesoDeRepeticion = d.PesoDeRepeticion,
+                FechaHora = DateTime.Now, // Fecha y hora actual
+                ResultadoRM = (int)((d.PesoDeRepeticion * 0.033 * d.RepeticionesConcretadas) + d.PesoDeRepeticion) // Cálculo de RM
+            }).ToList();
+
+            await _planEntrenamientoRepository.CrearRegistrosDeDesempeño(registros);
+        }
+
+        // 2️⃣ Obtener registros entre fechas
+        public async Task<List<RegistroDesempeñoSerie>> ObtenerRegistrosEntreFechas(DateTime fechaInicio, DateTime fechaFin)
+        {
+            return await _planEntrenamientoRepository.ObtenerRegistrosEntreFechas(fechaInicio, fechaFin);
+        }
         public async Task<PlanDeEntrenamiento> Crear(CrearPlanDeEntrenamientoDto planDto)
         {
             PlanDeEntrenamiento plan = new PlanDeEntrenamiento()

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using ProgressusWebApi.Models.InventarioModels;
 
 namespace ProgressusWebApi.Models.EjercicioModels
 {
@@ -10,6 +11,9 @@ namespace ProgressusWebApi.Models.EjercicioModels
         public string Descripcion { get; set; }
         public string? ImagenMaquina { get; set; }
         public string? VideoEjercicio { get; set; }
+        
+        public string NombreMaquina { get; set; }
+        public bool MaquinaEnReparacion { get; set; }
         public List<MusculoDeEjercicio>? MusculosDeEjercicio { get; set; } = new List<MusculoDeEjercicio>();
     }
 }

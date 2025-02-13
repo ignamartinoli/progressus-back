@@ -1,4 +1,5 @@
-﻿using ProgressusWebApi.Models.EjercicioModels;
+﻿using ProgressusWebApi.Dtos.EjercicioDtos.EjercicioDto;
+using ProgressusWebApi.Models.EjercicioModels;
 
 namespace ProgressusWebApi.Repositories.EjercicioRepositories.Interfaces
 {
@@ -11,6 +12,8 @@ namespace ProgressusWebApi.Repositories.EjercicioRepositories.Interfaces
         Task<Ejercicio?> Eliminar(int id);
         Task<List<Ejercicio?>> ObtenerPorGrupoMuscular(int grupoMuscularId);
         Task<List<Ejercicio?>> ObtenerPorMusculo(int musculoId);
+        Task AsociarEjercicios(int ejercicioId, List<int> ejerciciosAsociadosIds);
+        Task<EjerciciosAsociadoDto> ObtenerEjerciciosAsociados(int ejercicioId);
 
     }
 }

@@ -26,6 +26,10 @@ namespace ProgressusWebApi.DataContext
     public class ProgressusDataContext : IdentityDbContext
     {
         public ProgressusDataContext(DbContextOptions<ProgressusDataContext> options) : base(options) { }
+
+        public DbSet<EjercicioAsociado> EjerciciosAsociados { get; set; }
+        public DbSet<RegistroDesempeñoSerie> RegistrosDesempeñoSeries { get; set; }
+
         public DbSet<PlanDeEntrenamiento> PlanesDeEntrenamiento { get; set; }
         public DbSet<DiaDePlan> DiasDePlan { get; set; }
         public DbSet<EjercicioEnDiaDelPlan> EjerciciosDelDia { get; set; }
@@ -40,10 +44,9 @@ namespace ProgressusWebApi.DataContext
         public DbSet<Entrenador> Entrenadores { get; set; }
         public DbSet<Membresia> Membresias { get; set; }
         public DbSet<TipoDePago> TipoDePagos { get; set; }
-        public DbSet<SolicitudDePago> SolicitudDePagos  { get; set; }
-        public DbSet<EstadoSolicitud> EstadoSolicitudes  { get; set; }
+        public DbSet<SolicitudDePago> SolicitudDePagos { get; set; }
+        public DbSet<EstadoSolicitud> EstadoSolicitudes { get; set; }
         public DbSet<HistorialSolicitudDePago> HistorialSolicitudDePagos { get; set; }
-
         public DbSet<ReservaTurno> Reservas { get; set; }
         public DbSet<Inventario> Inventario { get; set; }
         public DbSet<AsistenciaLog> AsistenciaLogs { get; set; }
@@ -53,32 +56,46 @@ namespace ProgressusWebApi.DataContext
         public DbSet<MedicionesUsuario> MedicionesUsuario { get; set; }
         public DbSet<RutinasFinalizadasXUsuario> RutinasFinalizadasXUsuarios { get; set; }
         public DbSet<AsistenciasPorFranjaHoraria> AsistenciasPorFranjaHoraria { get; set; }
-	public DbSet<TipoNotificacion> TiposNotificaciones { get; set; }
-	public DbSet<EstadoNotificacion> EstadosNotificaciones { get; set; }
-	public DbSet<PlantillaNotificacion> PlantillasNotificaciones { get; set; }
-	public DbSet<Models.NotificacionesModel.Notificacion> NotificacionesUsuarios { get; set; }
-
+        public DbSet<TipoNotificacion> TiposNotificaciones { get; set; }
+        public DbSet<EstadoNotificacion> EstadosNotificaciones { get; set; }
+        public DbSet<PlantillaNotificacion> PlantillasNotificaciones { get; set; }
+        public DbSet<Models.NotificacionesModel.Notificacion> NotificacionesUsuarios { get; set; }
         public DbSet<PlanNutricional> PlanesNutricionales { get; set; }
         public DbSet<DiaPlan> DiasPlan { get; set; }
         public DbSet<Comida> Comidas { get; set; }
         public DbSet<AlimentoComida> AlimentosComida { get; set; }
-
         public DbSet<Alimento> Alimento { get; set; }
         public DbSet<AsignacionPlanNutricional> AsignacionesPlanNutricional { get; set; }
-
         public DbSet<Paciente> Pacientes { get; set; }
-
         public DbSet<Carrito> Carrito { get; set; }
-
         public DbSet<CarritoItem> CarritoItem { get; set; }
-
         public DbSet<Pedido> Pedido { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configuración de claves compuestas
+            // **EjercicioAsociado**
+            modelBuilder.Entity<EjercicioAsociado>()
+                .HasOne(ea => ea.Ejercicio)
+                .WithMany()
+                .HasForeignKey(ea => ea.EjercicioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EjercicioAsociado>()
+                .HasOne(ea => ea.EjercicioAlternativo)
+                .WithMany()
+                .HasForeignKey(ea => ea.EjercicioAlternativoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // **RegistroDesempeñoSerie**
+            modelBuilder.Entity<RegistroDesempeñoSerie>()
+                .HasOne(r => r.EjercicioEnDiaDelPlan)
+                .WithMany()
+                .HasForeignKey(r => r.EjercicioEnDiaDelPlanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // **Restricciones de claves compuestas**
             modelBuilder.Entity<AsignacionDePlan>()
                 .HasKey(ap => new { ap.PlanDeEntrenamientoId, ap.SocioId });
 
@@ -88,17 +105,11 @@ namespace ProgressusWebApi.DataContext
             modelBuilder.Entity<EjercicioEnDiaDelPlan>()
                 .HasKey(edp => new { edp.EjercicioId, edp.DiaDePlanId });
 
-
-            // Configuración de las relaciones entre las entidades
+            // **Relaciones adicionales**
             modelBuilder.Entity<MusculoDeEjercicio>()
                 .HasOne(me => me.Ejercicio)
                 .WithMany(e => e.MusculosDeEjercicio)
                 .HasForeignKey(me => me.EjercicioId);
-
-            modelBuilder.Entity<MusculoDeEjercicio>()
-                .HasOne(me => me.Musculo)
-                .WithMany(m => m.MusculosDeEjercicio)
-                .HasForeignKey(me => me.MusculoId);
 
             modelBuilder.Entity<DiaDePlan>()
                 .HasOne(dp => dp.PlanDeEntrenamiento)
@@ -123,26 +134,6 @@ namespace ProgressusWebApi.DataContext
                 .WithMany(ed => ed.SeriesDeEjercicio)
                 .HasForeignKey(se => new { se.EjercicioId, se.DiaDePlanId });
 
-            modelBuilder.Entity<Musculo>()
-                .HasOne(m => m.GrupoMuscular)
-                .WithMany(gm => gm.MusculosDelGrupo)
-                .HasForeignKey(m => m.GrupoMuscularId);
-
-            //modelBuilder.Entity<AsignacionDePlan>()
-                //.HasOne(ap => ap.Socio)
-                //.WithMany()
-                //.HasForeignKey(ap => ap.SocioId);
-
-            modelBuilder.Entity<AsignacionDePlan>()
-                .HasOne(ap => ap.PlanDeEntrenamiento)
-                .WithMany(p => p.Asignaciones)
-                .HasForeignKey(ap => ap.PlanDeEntrenamientoId);
-
-            modelBuilder.Entity<PlanDeEntrenamiento>()
-                .HasOne(m => m.ObjetivoDelPlan)
-                .WithMany(op => op.PlanesDeEntrenamiento)
-                .HasForeignKey(m => m.ObjetivoDelPlanId);
-
             modelBuilder.Entity<HistorialSolicitudDePago>()
                 .HasOne(h => h.SolicitudDePago)
                 .WithMany(sp => sp.HistorialSolicitudDePagos)
@@ -162,100 +153,8 @@ namespace ProgressusWebApi.DataContext
                 .HasOne(h => h.Membresia)
                 .WithMany()
                 .HasForeignKey(h => h.MembresiaId);
-            modelBuilder.Entity<ReservaTurno>()
-            .HasOne<IdentityUser>()  // O reemplaza con tu clase personalizada si la tienes
-            .WithMany()
-             .HasForeignKey(r => r.UserId)
-             .HasConstraintName("FK_Reservas_Users");
-
-            // Configurar relación entre AsistenciaLog y ReservaTurno
-            modelBuilder.Entity<AsistenciaLog>()
-                .HasOne(a => a.ReservaTurno) // Relación con ReservaTurno
-                .WithMany()                 // Relación de uno a muchos
-                .HasForeignKey(a => a.ReservaId) // Clave foránea
-                .HasConstraintName("FK_AsistenciaLog_ReservaTurno");
-
-            // Configurar relación entre AsistenciaLog y IdentityUser
-            modelBuilder.Entity<AsistenciaLog>()
-                .HasOne<IdentityUser>() // Relación con el usuario
-                .WithMany()
-                .HasForeignKey(a => a.UserId) // Clave foránea
-                .HasConstraintName("FK_AsistenciaLog_Users");
-
-            modelBuilder.Entity<RutinasFinalizadasXUsuario>()
-                .ToTable("RutinasFinalizadasXUsuario");
-
-            modelBuilder.Entity<MedicionesUsuario>()
-                .ToTable("Mediciones");
-
-            modelBuilder.Entity<AsistenciasPorFranjaHoraria>()
-                .HasNoKey();
-
-            modelBuilder.Entity<Alimento>()
-             .ToTable("AlimentosCalculo");
-
-
-            // Configurar nombres de tablas
-            modelBuilder.Entity<PlanNutricional>().ToTable("PlanNutricional");
-            modelBuilder.Entity<DiaPlan>().ToTable("DiaPlan");
-            modelBuilder.Entity<Comida>().ToTable("Comida");
-            modelBuilder.Entity<AlimentoComida>().ToTable("AlimentoComida");
- 
-            // Configurar relaciones
-            modelBuilder.Entity<PlanNutricional>()
-                .HasMany(p => p.Dias)
-                .WithOne(d => d.PlanNutricional)
-                .HasForeignKey(d => d.PlanNutricionalId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<DiaPlan>()
-                .HasMany(d => d.Comidas)
-                .WithOne(c => c.DiaPlan)
-                .HasForeignKey(c => c.DiaPlanId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<Comida>()
-                .HasMany(c => c.Alimentos)
-                .WithOne(a => a.Comida)
-                .HasForeignKey(a => a.ComidaId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<AlimentoComida>()
-                .HasOne(a => a.Alimento)
-                .WithMany()
-                .HasForeignKey(a => a.AlimentoId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-
-
-            // Configurar la tabla de asignaciones
-            modelBuilder.Entity<AsignacionPlanNutricional>()
-                .HasKey(a => a.Id);
-
-            // Relación con AspNetUsers
-            modelBuilder.Entity<AsignacionPlanNutricional>()
-                .HasOne(a => a.Usuario)
-                .WithMany()
-                .HasForeignKey(a => a.UsuarioId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // Relación con PlanNutricional
-            modelBuilder.Entity<AsignacionPlanNutricional>()
-                .HasOne(a => a.PlanNutricional)
-                .WithMany()
-                .HasForeignKey(a => a.PlanNutricionalId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-
-            // Configurar la clave primaria para CarritoItem
-            modelBuilder.Entity<CarritoItem>()
-                .HasKey(ci => ci.Id);
-
-
-            modelBuilder.Entity<Carrito>()
-      .HasMany(c => c.Items)
-      .WithOne()
-      .HasForeignKey(ci => ci.CarritoId); // Asegúrate de que CarritoItem tenga una propiedad CarritoId
         }
     }
+
 }
+

@@ -23,6 +23,28 @@ namespace ProgressusWebApi.Controllers.EjercicioControllers
             _progressusDataContext = progressusDataContext;
         }
 
+        [HttpPost("AsociarEjercicios")]
+        public async Task<IActionResult> AsociarEjercicios(int ejercicioId, [FromBody] List<int> ejerciciosAsociadosIds)
+        {
+            if (ejerciciosAsociadosIds == null || !ejerciciosAsociadosIds.Any())
+            {
+                return BadRequest("Se deben proporcionar ejercicios a asociar.");
+            }
+
+            await _ejercicioService.AsociarEjercicios(ejercicioId, ejerciciosAsociadosIds);
+            return Ok("Ejercicios asociados correctamente.");
+        }
+
+        // 2️⃣ Endpoint para obtener ejercicios asociados con MaquinaEnReparacion = true
+        [HttpGet("ObtenerEjerciciosAsociados/{ejercicioId}")]
+        public async Task<IActionResult> ObtenerEjerciciosAsociados(int ejercicioId)
+        {
+            var resultado = await _ejercicioService.ObtenerEjerciciosAsociados(ejercicioId);
+            return Ok(resultado);
+        }
+
+
+
         [HttpPut("ActualizarMusculosDeEjercicio(PARCHE)")]
         public async Task<IActionResult> Prueba([FromBody] AgregarQuitarMusculoAEjercicioDto agregarQuitarMusculoAEjercicioDto)
         {

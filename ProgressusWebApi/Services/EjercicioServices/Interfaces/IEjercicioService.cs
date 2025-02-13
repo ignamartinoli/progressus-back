@@ -12,5 +12,8 @@ namespace ProgressusWebApi.Services.EjercicioServices.Interfaces
         Task<List<Ejercicio>> ObtenerPorMusculo(int musculoId);
         Task<Ejercicio?> Actualizar(int id, CrearActualizarEjercicioDto ejercicio);
         Task<Ejercicio?> Eliminar(int id);
+
+        Task AsociarEjercicios(int ejercicioId, List<int> ejerciciosAsociadosIds);
+        Task<EjerciciosAsociadoDto> ObtenerEjerciciosAsociados(int ejercicioId);
     }
 }

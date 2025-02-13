@@ -100,8 +100,32 @@ namespace ProgressusWebApi.Services.InventarioServices
                 await _context.SaveChangesAsync();
             }
 
+            // **Verificar si todas las máquinas con el mismo nombre están en reparación**
+            var maquinasMismoNombre = await _context.Inventario
+                .Where(m => m.Nombre == inventario.Nombre)
+                .ToListAsync();
+
+            bool todasEnReparacion = maquinasMismoNombre.All(m => m.Estado == "En Reparación/Mantenimiento");
+
+            if (todasEnReparacion)
+            {
+                // **Actualizar MaquinaEnReparacion en los ejercicios**
+                var ejerciciosAsociados = await _context.Ejercicios
+                    .Where(e => e.NombreMaquina == inventario.Nombre)
+                    .ToListAsync();
+
+                foreach (var ejercicio in ejerciciosAsociados)
+                {
+                    ejercicio.MaquinaEnReparacion = true;
+                }
+
+                _context.Ejercicios.UpdateRange(ejerciciosAsociados);
+                await _context.SaveChangesAsync();
+            }
+
             return new OkObjectResult(inventario);
         }
+
 
         public async Task<IActionResult> EliminarInventarioAsync(string id)
         {

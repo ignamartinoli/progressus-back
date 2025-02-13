@@ -1,5 +1,6 @@
 ﻿using ProgressusWebApi.Dtos.EjercicioDtos.EjercicioDto;
 using ProgressusWebApi.Models.EjercicioModels;
+using ProgressusWebApi.Repositories.EjercicioRepositories;
 using ProgressusWebApi.Repositories.EjercicioRepositories.Interfaces;
 using ProgressusWebApi.Services.EjercicioServices.Interfaces;
 
@@ -11,6 +12,16 @@ namespace ProgressusWebApi.Services.EjercicioServices
         public EjercicioService(IEjercicioRepository repository)
         {
             _repository = repository;
+        }
+
+        public async Task AsociarEjercicios(int ejercicioId, List<int> ejerciciosAsociadosIds)
+        {
+            await _repository.AsociarEjercicios(ejercicioId, ejerciciosAsociadosIds);
+        }
+
+        public async Task<EjerciciosAsociadoDto> ObtenerEjerciciosAsociados(int ejercicioId)
+        {
+            return await _repository.ObtenerEjerciciosAsociados(ejercicioId);
         }
         public async Task<Ejercicio?> Actualizar(int id, CrearActualizarEjercicioDto ejercicioDto)
         {

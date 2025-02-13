@@ -19,6 +19,33 @@ namespace ProgressusWebApi.Controllers.PlanEntrenamientoControllers
         }
 
         //ObtenerPorId, ObtenerPlantillas, ObtenerPorNombre, ObtenerPorObjetivo
+        // 1️⃣ Endpoint para crear registros de desempeño
+        [HttpPost("CrearRegistrosDesempeño")]
+        public async Task<IActionResult> CrearRegistrosDesempeño([FromBody] DesempeñoDto desempeñoDto)
+        {
+            if (desempeñoDto == null || desempeñoDto.desempeños == null || !desempeñoDto.desempeños.Any())
+            {
+                return BadRequest("Debe proporcionar al menos un registro de desempeño.");
+            }
+
+            await _planDeEntrenamientoService.CrearRegistrosDeDesempeño(desempeñoDto);
+            return Ok("Registros de desempeño creados correctamente.");
+        }
+
+        // 2️⃣ Endpoint para obtener registros entre fechas
+        [HttpGet("ObtenerRegistrosEntreFechas")]
+        public async Task<IActionResult> ObtenerRegistrosEntreFechas([FromQuery] DateTime fechaInicio, [FromQuery] DateTime fechaFin)
+        {
+            if (fechaInicio > fechaFin)
+            {
+                return BadRequest("La fecha de inicio debe ser anterior a la fecha de fin.");
+            }
+
+            var registros = await _planDeEntrenamientoService.ObtenerRegistrosEntreFechas(fechaInicio, fechaFin);
+            return Ok(registros);
+        }
+
+
 
         [HttpPost("CrearPlanDeEntrenamiento")]
         public async Task<IActionResult> CrearPlanDeEntrenamiento([FromBody] CrearPlanDeEntrenamientoDto planDto)

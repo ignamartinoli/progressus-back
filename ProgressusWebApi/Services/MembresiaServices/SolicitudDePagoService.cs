@@ -129,7 +129,6 @@ namespace ProgressusWebApi.Services.MembresiaServices
             }
             
             return new OkObjectResult(pref);
-
        }
 
         public async Task<IActionResult> ObtenerTodasLasSolicitudesDeUnSocio(string identityUserId)

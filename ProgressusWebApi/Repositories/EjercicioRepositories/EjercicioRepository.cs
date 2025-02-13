@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProgressusWebApi.DataContext;
+using ProgressusWebApi.Dtos.EjercicioDtos.EjercicioDto;
 using ProgressusWebApi.Models.EjercicioModels;
 using ProgressusWebApi.Repositories.EjercicioRepositories.Interfaces;
 
@@ -12,6 +13,38 @@ namespace ProgressusWebApi.Repositories.EjercicioRepositories
         public EjercicioRepository(ProgressusDataContext context)
         {
             _context = context;
+        }
+
+        // 1️Asociar ejercicios
+        public async Task AsociarEjercicios(int ejercicioId, List<int> ejerciciosAsociadosIds)
+        {
+            foreach (var asociadoId in ejerciciosAsociadosIds)
+            {
+                var asociacion = new EjercicioAsociado
+                {
+                    EjercicioId = ejercicioId,
+                    EjercicioAlternativoId = asociadoId
+                };
+                _context.EjerciciosAsociados.Add(asociacion);
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        // 2️Obtener ejercicios asociados filtrando por MaquinaEnReparacion = true
+        public async Task<EjerciciosAsociadoDto> ObtenerEjerciciosAsociados(int ejercicioId)
+        {
+            var ejerciciosAsociados = await _context.EjerciciosAsociados
+                .Where(ea => ea.EjercicioId == ejercicioId)
+                .Select(ea => ea.EjercicioAlternativo)
+                .Where(e => e.MaquinaEnReparacion) // Filtra los ejercicios cuya máquina está en reparación
+                .ToListAsync();
+
+            return new EjerciciosAsociadoDto
+            {
+                EjercicioId = ejercicioId,
+                EjerciciosAsociados = ejerciciosAsociados
+            };
         }
 
         public async Task<Ejercicio?> Actualizar(int id, Ejercicio ejercicio)

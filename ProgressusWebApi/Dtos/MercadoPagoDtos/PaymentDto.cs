@@ -83,7 +83,7 @@ namespace ProgressusWebApi.Dtos.MercadoPagoDtos
 		public string picture_url { get; set; }
 		public string quantity { get; set; }
 		public string title { get; set; }
-		public string unit_price { get; set; }
+		public int unit_price { get; set; }
 	}
 	public class Payer
 	{

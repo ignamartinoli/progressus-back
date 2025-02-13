@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProgressusWebApi.DataContext;
 using ProgressusWebApi.Model;
+using ProgressusWebApi.Models.PlanEntrenamientoModels;
 using ProgressusWebApi.Repositories.Interfaces;
 
 namespace ProgressusWebApi.Repositories.PlanEntrenamientoRepositories 
@@ -14,6 +15,21 @@ namespace ProgressusWebApi.Repositories.PlanEntrenamientoRepositories
         public PlanDeEntrenamientoRepository(ProgressusDataContext context)
         {
             _context = context;
+        }
+
+        // 1️⃣ Crear registros de desempeño
+        public async Task CrearRegistrosDeDesempeño(List<RegistroDesempeñoSerie> desempeños)
+        {
+            await _context.RegistrosDesempeñoSeries.AddRangeAsync(desempeños);
+            await _context.SaveChangesAsync();
+        }
+
+        // 2️⃣ Obtener registros entre fechas
+        public async Task<List<RegistroDesempeñoSerie>> ObtenerRegistrosEntreFechas(DateTime fechaInicio, DateTime fechaFin)
+        {
+            return await _context.RegistrosDesempeñoSeries
+                .Where(rd => rd.FechaHora >= fechaInicio && rd.FechaHora <= fechaFin)
+                .ToListAsync();
         }
 
         public async Task<PlanDeEntrenamiento> Crear(PlanDeEntrenamiento plan)
