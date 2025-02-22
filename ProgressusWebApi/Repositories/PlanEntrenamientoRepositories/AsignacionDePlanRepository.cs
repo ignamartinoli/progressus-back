@@ -71,5 +71,10 @@ namespace ProgressusWebApi.Repositories.PlanEntrenamientoRepositories
 
             return asignacionExistente;
         }
+
+        public async Task<List<AsignacionDePlan>> ObtenerAsignacionesAPlan(int idPlan)
+        {
+            return await _context.AsignacionesDePlanes.Where(p => p.PlanDeEntrenamientoId == idPlan).ToListAsync();
+        }
     }
 }

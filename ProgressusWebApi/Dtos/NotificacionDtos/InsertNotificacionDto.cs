@@ -6,5 +6,5 @@
 		public string UsuarioId { get; set; }
 		public int EstadoNotificacionId { get; set; }
 		public DateTime? FechaEnvio { get; set; }
-	}
+    }
 }

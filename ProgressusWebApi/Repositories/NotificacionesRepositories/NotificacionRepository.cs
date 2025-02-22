@@ -14,7 +14,18 @@ namespace ProgressusWebApi.Repositories.NotificacionesRepositories
 			_context = context;
 		}
 
-		public async Task<List<Notificacion>> ObtenerNotificacionesPorUsuarioAsync(string usuarioId)
+        public async Task<List<Notificacion>> ObtenerNotificacionesPendientesAsync()
+        {
+            return await _context.NotificacionesUsuarios
+                .Include(n => n.EstadoNotificacion)
+                .Include(n => n.PlantillaNotificacion)
+                .ThenInclude(p => p.TipoNotificacion)
+                .Where(n => !n.FechaEnvio.HasValue)
+				.ToListAsync(); // En realidad esto te va a cagar la performance, pero así está en todos lados
+								// Debería ser un IQueryable
+        }
+
+        public async Task<List<Notificacion>> ObtenerNotificacionesPorUsuarioAsync(string usuarioId)
 		{
 			return await _context.NotificacionesUsuarios
 				.Include(n => n.EstadoNotificacion)
@@ -53,6 +64,41 @@ namespace ProgressusWebApi.Repositories.NotificacionesRepositories
 			catch
 			{
 				return false;
+			}
+		}
+
+		public async Task<bool> CambiarEstadoNotifiacionesMasivo(List<int> idNotificaciones, int idEstado)
+		{
+			// La razón de este metodo aparte es evitar problemas de performance
+			// (no hacer db.savechanges por cada noti)
+			// y/o inconsistencia
+			// (si falla una noti el resto quedaría enviada)
+			try
+			{
+				if (!idNotificaciones.Any())
+					return true;
+
+				var notificaciones = _context.NotificacionesUsuarios.Where(n => idNotificaciones.Contains(n.Id)).ToList();
+				if (!notificaciones.Any())
+					return false;
+
+
+				notificaciones = notificaciones.Select(n => 
+				{
+					n.EstadoNotificacionId = idEstado;
+					n.FechaEnvio = DateTime.UtcNow;
+					return n; 
+
+				}).ToList();
+
+
+				await _context.SaveChangesAsync();
+
+				return true;
+			}
+			catch
+			{
+				return false;	
 			}
 		}
 

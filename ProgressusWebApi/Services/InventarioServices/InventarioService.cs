@@ -10,6 +10,7 @@ using ProgressusWebApi.Models.NotificacionModel;
 using Microsoft.AspNetCore.Mvc;
 using ProgressusWebApi.Services.AuthServices.Interfaces;
 using ProgressusWebApi.Services.AuthServices;
+using ProgressusWebApi.Services.NotificacionesServices.Interfaces;
 
 namespace ProgressusWebApi.Services.InventarioServices
 {
@@ -17,12 +18,13 @@ namespace ProgressusWebApi.Services.InventarioServices
     {
         private readonly ProgressusDataContext _context;
         private readonly IAuthService _authService;
+        private readonly INotificacionesUsuariosService _notificacionesService;
 
-        public InventarioService(ProgressusDataContext context, IAuthService authService)
+        public InventarioService(ProgressusDataContext context, IAuthService authService, INotificacionesUsuariosService notificaciones)
         {
             _context = context;
             _authService = authService;
-
+            _notificacionesService = notificaciones;
         }
 
         public async Task<IActionResult> CrearInventarioAsync(InventarioDtos inventarioDto)
@@ -85,19 +87,10 @@ namespace ProgressusWebApi.Services.InventarioServices
                     return new NotFoundObjectResult("No se encontraron usuarios con el rol de Entrenador para notificar.");
                 }
 
-                foreach (var usuario in usuariosEntrenadores)
-                {
-                    var notificacion = new Notificacion
-                    {
-                        UsuarioId = usuario.IdentityUserId,
-                        Mensaje = $"El objeto de inventario '{inventario.Nombre}' id: '{inventario.Id}' ha cambiado su estado a 'En Reparación/Mantenimiento'.",
-                        Estado = false
-                    };
+                var entrenadores = usuariosEntrenadores.Select(u => u.IdentityUserId).ToList();
 
-                    _context.Notificaciones.Add(notificacion);
-                }
-
-                await _context.SaveChangesAsync();
+                // necesitamos tirar error? no creo
+                var _ = await _notificacionesService.NotificarMaquinaEnMantenimiento(entrenadores, inventario.Nombre, 0, "");
             }
 
             return new OkObjectResult(inventario);

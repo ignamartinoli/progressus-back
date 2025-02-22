@@ -8,5 +8,10 @@ namespace ProgressusWebApi.Repositories.NotificacionesRepositories.Interfaces
 		Task<bool> CrearNotificacionAsync(Notificacion notificacion);
 		Task<bool> EliminarNotificacionAsync(int notificacionId);
 		Task<bool> CambiarEstadoNotificacionAsync(int notificacionId, string nuevoEstado);
-	}
+
+		Task<List<Notificacion>> ObtenerNotificacionesPendientesAsync();
+
+		Task<bool> CambiarEstadoNotifiacionesMasivo(List<int> idNotificaciones, int idEstado);
+
+    }
 }

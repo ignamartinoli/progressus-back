@@ -9,6 +9,7 @@ using ProgressusWebApi.Repositories.EjercicioRepositories.Interfaces;
 using ProgressusWebApi.Repositories.Interfaces;
 using ProgressusWebApi.Repositories.PlanEntrenamientoRepositories;
 using ProgressusWebApi.Repositories.PlanEntrenamientoRepositories.Interfaces;
+using ProgressusWebApi.Services.NotificacionesServices.Interfaces;
 using ProgressusWebApi.Services.PlanEntrenamientoServices.Interfaces;
 
 namespace ProgressusWebApi.Services.PlanEntrenamientoServices
@@ -19,12 +20,18 @@ namespace ProgressusWebApi.Services.PlanEntrenamientoServices
         private readonly IDiaDePlanRepository _diaDePlanRepository;
         private readonly IEjercicioEnDiaDelPlanRepository _ejercicioDePlanRepository;
         private readonly IEjercicioRepository _ejercicioRepository;
-        public PlanDeEntrenamientoService(IPlanDeEntrenamientoRepository planEntrenamientoRepository, IDiaDePlanRepository diaDePlanRepository, IEjercicioEnDiaDelPlanRepository ejercicioDePlanRepository, IEjercicioRepository ejercicioRepository)
+        private readonly INotificacionesUsuariosService _notificacionesService;
+        private readonly IAsignacionDePlanRepository _asignacionRepository;
+
+        public PlanDeEntrenamientoService(IPlanDeEntrenamientoRepository planEntrenamientoRepository, IDiaDePlanRepository diaDePlanRepository, IEjercicioEnDiaDelPlanRepository ejercicioDePlanRepository, IEjercicioRepository ejercicioRepository,
+            INotificacionesUsuariosService notificaciones, IAsignacionDePlanRepository asignacion)
         {
             _planEntrenamientoRepository = planEntrenamientoRepository;
             _diaDePlanRepository = diaDePlanRepository;
             _ejercicioDePlanRepository = ejercicioDePlanRepository;
             _ejercicioRepository = ejercicioRepository;
+            _notificacionesService = notificaciones;
+            _asignacionRepository = asignacion;
         }
         public async Task<PlanDeEntrenamiento> Crear(CrearPlanDeEntrenamientoDto planDto)
         {
@@ -60,7 +67,15 @@ namespace ProgressusWebApi.Services.PlanEntrenamientoServices
             plan.Descripcion = planActualizadoDto.Descripcion;
             plan.ObjetivoDelPlanId = planActualizadoDto.ObjetivoDelPlanId;
         
-            return await _planEntrenamientoRepository.Actualizar(id, plan);
+            var planActualizado = await _planEntrenamientoRepository.Actualizar(id, plan);
+            if (planActualizado != null)
+            {
+                var idsSocios = _asignacionRepository.ObtenerAsignacionesAPlan(id).ContinueWith(p => p.Result.Select(a => a.SocioId).ToList()).Result;
+                // Necesitamos tirar error si falla? Me parece que no
+                await _notificacionesService.NotificarActualizacionPlan(idsSocios);
+            }
+
+            return planActualizado;
         }
 
         public async Task<PlanDeEntrenamiento?> ActualizarEjerciciosDelPlan(int planId, AgregarQuitarEjerciciosAPlanDto ejerciciosEnPlanDto)

@@ -37,7 +37,8 @@ namespace ProgressusWebApi.Services.ReservaService.cs.interfaces
         Task<List<AsistenciasPorMesYDia>> ObtenerAsistenciasPorMesYDiaAsync();
 
         Task<List<AsistenciasPorMes>> ObtenerAsistenciasPorMesAsync();
-        
+
+        Task<bool> TodasLasReservasSonAntiguas(string userId);
 
 
         }

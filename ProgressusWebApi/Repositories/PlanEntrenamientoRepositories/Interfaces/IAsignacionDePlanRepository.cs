@@ -8,5 +8,7 @@ namespace ProgressusWebApi.Repositories.PlanEntrenamientoRepositories.Interfaces
         Task<List<AsignacionDePlan>> ObtenerHistorialDePlanesAsignados(string socioId);
         Task<AsignacionDePlan?> AsignarPlan(string socioId, int planEntrenamientoId);
         Task<AsignacionDePlan?> QuitarAsignacionDePlan(string socioId, int planDeEntrenamientoId);
+
+        Task<List<AsignacionDePlan>> ObtenerAsignacionesAPlan(int idPlan);
     }
 }
